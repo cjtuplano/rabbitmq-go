@@ -4,13 +4,10 @@ import (
 	"log"
 
 	"github.com/cjtuplano/rabbitmq-go/config/model"
-
-	"github.com/spf13/viper"
 )
 
 //GetConfig function
 func GetConfig() configmodel.ConfigSettings {
-	viper.Reset()
 	env := GetEnv()
 
 	settings := configmodel.ConfigSettings{}
