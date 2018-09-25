@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
-	"rabbitmq-go/module/queues/services"
+	"rabbitmq-go"
 )
 
 func main() {
