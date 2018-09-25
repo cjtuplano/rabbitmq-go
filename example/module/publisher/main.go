@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	"rabbitmq-go"
+
+	"github.com/cjtuplano/rabbitmq-go"
 )
 
 func main() {

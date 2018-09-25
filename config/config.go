@@ -3,7 +3,7 @@ package config
 import (
 	"log"
 
-	"invento-chat-api/config/model"
+	"github.com/cjtuplano/rabbitmq-go/config/model"
 
 	"github.com/spf13/viper"
 )

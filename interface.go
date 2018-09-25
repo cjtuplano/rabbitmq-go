@@ -2,7 +2,8 @@ package queues
 
 import (
 	"log"
-	"rabbitmq-go/config"
+
+	"github.com/cjtuplano/rabbitmq-go/config"
 
 	"github.com/streadway/amqp"
 )
