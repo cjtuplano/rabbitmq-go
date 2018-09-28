@@ -3,7 +3,7 @@ package config
 import (
 	"log"
 
-	"rabbitmq-go/config/model"
+	"github.com/cjtuplano/rabbitmq-go/config/model"
 )
 
 //GetConfig function
