@@ -8,22 +8,26 @@ import (
 )
 
 func main() {
-	//use to create connection and channel and also to declare a queue
-	mqConn, channel, err := queues.Queue.ConnectMQ(queues.QueueListener{
-		QueueName:    "sample1",
+
+	queueDetails := queues.QueueDetails{
+		QueueName:    "queueName",
 		ExchangeName: "exchangeName",
 		ExchangeType: "direct",
-	})
+	}
+
+	//use to create connection and channel and also to declare a queue
+	mqConn, channel, err := queues.Queue.ConnectMQ(queueDetails)
 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	queueDetails.Connection = mqConn
+	queueDetails.Channel = channel
+	queueDetails.RouteKey = "routeKey"
+
 	//to listen and recieve message from queue using the connection and channel
-	_, deliveries := queues.Queue.Consume(queues.QueueListener{
-		QueueName:  "sample1",
-		Connection: mqConn,
-		Channel:    channel,
-	})
+	_, deliveries := queues.Queue.Consume(queueDetails)
 
 	forever := make(chan bool)
 	go func() {
@@ -31,12 +35,17 @@ func main() {
 			/*
 				Do something
 			*/
+			//Check if message comes from specific route
+			if resp.RoutingKey == queueDetails.RouteKey {
+				fmt.Println(string(resp.Body))
 
-			fmt.Println(string(resp.Body))
+				// acknowledge the message once done with the task
+				resp.Ack(false)
+			}
 
-			// acknowledge the message once done with the task
-			resp.Ack(false)
 		}
 	}()
+
+	log.Println("[-] Waiting for Messages ... ")
 	<-forever
 }
