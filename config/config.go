@@ -3,14 +3,11 @@ package config
 import (
 	"log"
 
-	"invento-chat-api/config/model"
-
-	"github.com/spf13/viper"
+	"github.com/cjtuplano/rabbitmq-go/config/model"
 )
 
 //GetConfig function
 func GetConfig() configmodel.ConfigSettings {
-	viper.Reset()
 	env := GetEnv()
 
 	settings := configmodel.ConfigSettings{}

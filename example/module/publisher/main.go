@@ -3,24 +3,31 @@ package main
 import (
 	"fmt"
 	"log"
-	"rabbitmq-go"
+
+	"github.com/cjtuplano/rabbitmq-go"
 )
 
 func main() {
-	//use to create connection and channel and also to declare a queue
-	mqConn, channel, err := queues.Queue.ConnectMQ(queues.QueueListener{
-		QueueName:    "sample1",
+
+	queueDetails := queues.QueueDetails{
+		QueueName:    "queueName",
 		ExchangeName: "exchangeName",
 		ExchangeType: "direct",
-	})
+	}
+
+	//use to create connection and channel and also to declare a queue
+	mqConn, channel, err := queues.Queue.ConnectMQ(queueDetails)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	//send the message by using the same connection and channel
-	publisherData := queues.QueueListener{QueueName: "sample1", Message: []byte("hello"), Connection: mqConn, Channel: channel}
+	queueDetails.Message = []byte("hello world!")
+	queueDetails.Connection = mqConn
+	queueDetails.Channel = channel
+	queueDetails.RouteKey = "routeKey"
 
-	res := queues.Queue.Publish(publisherData)
+	res := queues.Queue.Publish(queueDetails)
 	fmt.Println(res)
 }

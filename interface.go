@@ -2,7 +2,8 @@ package queues
 
 import (
 	"log"
-	"rabbitmq-go/config"
+
+	"github.com/cjtuplano/rabbitmq-go/config"
 
 	"github.com/streadway/amqp"
 )
@@ -22,7 +23,8 @@ type Queue interface {
 	ConnectMQ() (*amqp.Connection, *amqp.Channel, error)
 }
 
-type QueueListener struct {
+//QueueDetails - data structure
+type QueueDetails struct {
 	ExchangeName string           `json:"exchangeName"`
 	ExchangeType string           `json:"exchangeType"`
 	BindKey      string           `json:"bindingKey"`
@@ -30,10 +32,11 @@ type QueueListener struct {
 	Message      []byte           `json:"message"`
 	Connection   *amqp.Connection `json:"connection"`
 	Channel      *amqp.Channel    `json:"channel"`
+	RouteKey     string           `json:"routeKey"`
 }
 
 //ConnectMQ - for one time rabbitmq connection
-func (listener QueueListener) ConnectMQ() (*amqp.Connection, *amqp.Channel, error) {
+func (queueDetails QueueDetails) ConnectMQ() (*amqp.Connection, *amqp.Channel, error) {
 	conn, err := amqp.Dial(settings.MQSettings.Link)
 	failOnError(err, "Failed to connect to RabbitMQ")
 
@@ -46,8 +49,8 @@ func (listener QueueListener) ConnectMQ() (*amqp.Connection, *amqp.Channel, erro
 	*/
 
 	err = ch.ExchangeDeclare(
-		listener.ExchangeName,
-		listener.ExchangeType,
+		queueDetails.ExchangeName,
+		queueDetails.ExchangeType,
 		true,
 		false,
 		false,
@@ -59,7 +62,7 @@ func (listener QueueListener) ConnectMQ() (*amqp.Connection, *amqp.Channel, erro
 	//declare queue
 	//QueueDeclare arguments (name string, durable, autoDelete, exclusive, noWait bool, args Table)
 	_, err = ch.QueueDeclare(
-		listener.QueueName,
+		queueDetails.QueueName,
 		true,
 		false,
 		false,
@@ -71,32 +74,40 @@ func (listener QueueListener) ConnectMQ() (*amqp.Connection, *amqp.Channel, erro
 }
 
 //Publish - Queue Publisher
-func (listener QueueListener) Publish() string {
+func (queueDetails QueueDetails) Publish() string {
 
-	ch := listener.Channel
+	ch := queueDetails.Channel
 
 	err := ch.Publish(
-		listener.ExchangeName, //exchange type
-		listener.QueueName,    // route key
+		queueDetails.ExchangeName, //exchange name
+		queueDetails.RouteKey,     // route key
 		false,
 		false,
 		amqp.Publishing{
 			DeliveryMode: amqp.Persistent,
 			ContentType:  "text/plain",
-			Body:         listener.Message,
+			Body:         queueDetails.Message,
 		})
-	log.Printf(" [x] Sent %s", string(listener.Message))
+	log.Printf(" [x] Sent %s", string(queueDetails.Message))
 	failOnError(err, "Failed to publish a message")
 	return "Message sent"
 }
 
 //Consume - Queue Consumer
-func (listener QueueListener) Consume() (*amqp.Connection, <-chan amqp.Delivery) {
+func (queueDetails QueueDetails) Consume() (*amqp.Connection, <-chan amqp.Delivery) {
 
-	conn := listener.Connection
-	ch := listener.Channel
+	conn := queueDetails.Connection
+	ch := queueDetails.Channel
 
-	err := ch.Qos(
+	err := ch.QueueBind(
+		queueDetails.QueueName,    // queue name
+		queueDetails.RouteKey,     // routing key
+		queueDetails.ExchangeName, // exchange
+		false,
+		nil)
+	failOnError(err, "Failed to bind a queue")
+
+	err = ch.Qos(
 		1,
 		0,
 		false,
@@ -104,7 +115,7 @@ func (listener QueueListener) Consume() (*amqp.Connection, <-chan amqp.Delivery)
 	failOnError(err, "Failed to set QoS")
 
 	deliveries, err := ch.Consume(
-		listener.QueueName,
+		queueDetails.QueueName,
 		"",
 		false,
 		false,
