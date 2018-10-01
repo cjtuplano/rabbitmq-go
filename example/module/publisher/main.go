@@ -13,6 +13,7 @@ func main() {
 		QueueName:    "queueName",
 		ExchangeName: "exchangeName",
 		ExchangeType: "direct",
+		RouteKey:     "routeKey",
 	}
 
 	//use to create connection and channel and also to declare a queue
@@ -26,7 +27,6 @@ func main() {
 	queueDetails.Message = []byte("hello world!")
 	queueDetails.Connection = mqConn
 	queueDetails.Channel = channel
-	queueDetails.RouteKey = "routeKey"
 
 	res := queues.Queue.Publish(queueDetails)
 	fmt.Println(res)

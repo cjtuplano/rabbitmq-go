@@ -13,6 +13,7 @@ func main() {
 		QueueName:    "queueName",
 		ExchangeName: "exchangeName",
 		ExchangeType: "direct",
+		RouteKey:     "routeKey",
 	}
 
 	//use to create connection and channel and also to declare a queue
@@ -24,7 +25,6 @@ func main() {
 
 	queueDetails.Connection = mqConn
 	queueDetails.Channel = channel
-	queueDetails.RouteKey = "routeKey"
 
 	//to listen and recieve message from queue using the connection and channel
 	_, deliveries := queues.Queue.Consume(queueDetails)
@@ -32,14 +32,12 @@ func main() {
 	forever := make(chan bool)
 	go func() {
 		for resp := range deliveries {
-			/*
-				Do something
-			*/
 			//Check if message comes from specific route
-			if resp.RoutingKey == queueDetails.RouteKey {
+			if resp.RoutingKey == "routeKey" {
+				/*
+					Do Something
+				*/
 				fmt.Println(string(resp.Body))
-
-				// acknowledge the message once done with the task
 				resp.Ack(false)
 			}
 
