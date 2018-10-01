@@ -70,13 +70,15 @@ func (queueDetails QueueDetails) ConnectMQ() (*amqp.Connection, *amqp.Channel, e
 		nil,
 	)
 
-	err = ch.QueueBind(
-		queueDetails.QueueName,    // queue name
-		queueDetails.RouteKey,     // routing key
-		queueDetails.ExchangeName, // exchange
-		false,
-		nil)
-	failOnError(err, "Failed to bind a queue")
+	if queueDetails.RouteKey != "" {
+		err = ch.QueueBind(
+			queueDetails.QueueName,    // queue name
+			queueDetails.RouteKey,     // routing key
+			queueDetails.ExchangeName, // exchange
+			false,
+			nil)
+		failOnError(err, "Failed to bind a queue")
+	}
 
 	return conn, ch, err
 }
