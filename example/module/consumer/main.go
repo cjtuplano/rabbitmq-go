@@ -8,11 +8,15 @@ import (
 )
 
 func main() {
+	var routeKeys = []string{
+		"routeKey",
+	}
 
 	queueDetails := queues.QueueDetails{
 		QueueName:    "queueName",
 		ExchangeName: "exchangeName",
 		ExchangeType: "direct",
+		RouteKeys:    routeKeys,
 	}
 
 	//use to create connection and channel and also to declare a queue
