@@ -33,6 +33,7 @@ type QueueDetails struct {
 	Connection   *amqp.Connection `json:"connection"`
 	Channel      *amqp.Channel    `json:"channel"`
 	RouteKey     string           `json:"routeKey"`
+	RouteKeys    []string         `json:"routeKeys"`
 }
 
 //ConnectMQ - for one time rabbitmq connection
